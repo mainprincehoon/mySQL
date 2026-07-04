@@ -1,0 +1,170 @@
+CREATE DATABASE basics; -- create a db using command (this is a comment)
+
+show databases; -- list all the databases in mysql server
+
+create database if not exists basics; -- it will only create the database if it doesn't exist
+
+drop database princedb; -- deleting a db
+
+use basics; -- select a db to work
+
+show tables; -- list all the tables in the selected db
+
+create table users( -- create a table
+email varchar(50),
+password varchar(50),
+username varchar(50), 
+id int primary key auto_increment
+);
+
+desc users; -- describe the table
+
+insert into users ( username, password, email) values  -- insert data into the table
+('pins', '1234', 'pins@gmail.com' );
+
+insert into users ( username, password, email) values
+('pins2', '1234-2', 'pins2@gmail.com' );
+
+SELECT ID, EMAIL, USERNAME FROM USERS;
+
+SELECT * FROM USERS;
+
+INSERT INTO USERS (USERNAME, EMAIL, PASSWORD) VALUES
+('JD', 'JD@GMAIL.COM', '123456'),
+('RIYA', 'RY@GMAIL.COM', '123456'),
+('ROHIT', 'RR@GMAIL.COM', '123456');
+
+-- CREATE A POSTS TABLE WITH ID, CONTENT, USER_ID, CREATED_AT COLUMNS
+
+CREATE TABLE POSTS (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    CONTENT VARCHAR(255),
+    USER_ID INT, -- TO WHOM THE POST BELONGS
+    CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO POSTS (CONTENT, USER_ID) VALUES
+('HELLO WORLD', 1);
+
+INSERT INTO POSTS (CONTENT, CREATED_AT, USER_ID) VALUES
+('HELLO WORLD AGAIN', '2021-01-01 12:00:00', 1);
+
+SELECT * FROM POSTS;
+SELECT * FROM USERS WHERE ID = 3;
+
+SELECT * FROM POSTS WHERE USER_ID = 1 AND CONTENT = 'HELLO WORLD';
+
+-- OPERATORS IN MYSQL:
+-- =, !=, <, >, <=, >=, AND, OR, NOT, IN,
+-- BETWEEN, LIKE, IS NULL, IS NOT NULL
+
+SELECT * FROM POSTS
+WHERE CONTENT LIKE '%AGAIN%';
+
+-- %AGAIN%  -> Substring match
+-- %AGAIN   -> Ends with AGAIN
+-- AGAIN%   -> Starts with AGAIN
+
+SELECT * FROM POSTS WHERE CONTENT LIKE '%WORLD' ORDER BY CREATED_AT ASC;
+
+DELETE FROM POSTS WHERE ID = 1;
+
+DROP TABLE POSTS;
+
+UPDATE POSTS SET CONTENT = 'MY WORLD' WHERE ID = 2;  -- update a row in the table
+
+-- Pagination
+
+-- If we want to fetch only x number of rows from the table
+
+SELECT * FROM USERS LIMIT 2;
+
+SELECT * FROM USERS LIMIT 2 OFFSET 4;
+
+SELECT * FROM USERS LIMIT 1 OFFSET 2;
+
+
+CREATE TABLE COMMENTS (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    CONTENT VARCHAR(255),
+    USER_ID INT,      -- THE USER WHO MADE THE COMMENT
+    POST_ID INT,      -- THE POST ON WHICH THE COMMENT IS MADE
+    CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO COMMENTS (CONTENT, USER_ID, POST_ID) VALUES
+('NICE POST', 1, 2);
+
+INSERT INTO COMMENTS (CONTENT, USER_ID, POST_ID) VALUES
+('NICE POST', 1, 2);
+
+SELECT * FROM COMMENTS;
+
+DELETE FROM COMMENTS;
+
+TRUNCATE TABLE COMMENTS;
+
+
+-- CREATE A TABLE FOR MANAGING LIKES
+-- LIKES CAN BE DONE ON POSTS AND COMMENTS
+-- ID, USER_ID, CREATED_AT, LIKEABLE_ID, LIKEABLE_TYPE (ENUM)
+-- 1, 1, 2021-01-01 12:00:00, 1, POST
+
+CREATE TABLE LIKES (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    USER_ID INT,
+    CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    LIKEABLE_ID INT,
+    LIKEABLE_TYPE ENUM('POST', 'COMMENT')
+);
+
+INSERT INTO LIKES (USER_ID, LIKEABLE_ID, LIKEABLE_TYPE) VALUES
+(1, 1, 'POST');
+
+INSERT INTO LIKES (USER_ID, LIKEABLE_ID, LIKEABLE_TYPE) VALUES
+(1, 1, 'POST');
+
+SELECT * FROM LIKES;
+
+ALTER TABLE LIKES
+MODIFY LIKEABLE_TYPE ENUM('POST', 'COMMENT', 'REEL');
+
+DESC LIKES;
+
+INSERT INTO LIKES (USER_ID, LIKEABLE_ID, LIKEABLE_TYPE) VALUES
+(1, 1, 'REEL');
+
+DROP TABLE LIKES;
+
+
+-- If we create a comment then it should have some check to identify
+-- whether the post exists or not and the user exists or not.
+
+-- We can use foreign key here.
+-- A foreign key is a column or group of columns in a table
+-- that references the primary key of another table.
+
+DROP TABLE COMMENTS;
+
+CREATE TABLE COMMENTS (
+    ID INT PRIMARY KEY AUTO_INCREMENT,
+    CONTENT VARCHAR(255),
+    USER_ID INT,      -- THE USER WHO MADE THE COMMENT
+    POST_ID INT,      -- THE POST ON WHICH THE COMMENT IS MADE
+    CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (USER_ID) REFERENCES USERS(ID),
+    FOREIGN KEY (POST_ID) REFERENCES POSTS(ID)
+);
+
+DESC COMMENTS;
+
+SELECT * FROM COMMENTS;
+
+-- TRY TO FETCH USER DETAILS AND POST DETAILS ALSO WHEN GETTING THE COMMENTS
+
+SELECT * FROM COMMENTS INNER JOIN USERS ON COMMENTS.USER_ID = USERS.ID
+JOIN POSTS ON COMMENTS.POST_ID = POSTS.ID;
+
+SELECT * FROM COMMENTS RIGHT JOIN POSTS ON COMMENTS.POST_ID = POSTS.ID;
+
+SELECT * FROM POSTS LEFT JOIN COMMENTS ON POSTS.ID = COMMENTS.POST_ID;
